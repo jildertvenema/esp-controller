@@ -55,8 +55,15 @@ const addAction = (el, action) => {
     el.addEventListener('touchend', () => doAction(0))
 };
 
+var lastAction = -1;
+
 const doAction = (action) => {
-    fetch('http://' + ip + '/action?action=' + action).then(res => (res.text().then(res => console.log(res))))
+    lastAction = action;
+    fetch('http://' + ip + '/action?action=' + action).then(res => (res.text().then(res => {
+        if(action === lastAction && action !== 0) {
+            doAction(action);
+        }
+    })))
 }
 
 addAction(upAction, 2)
