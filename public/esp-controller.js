@@ -13,7 +13,7 @@ objectReclabel.style = 'margin: 0 auto;display:block;text-align: center;'
 objectReclabel.innerText = 'Use object recognition'
 objectReclabel.appendChild(objectRecInput)
 
-let ip = localStorage.getItem('esp32') || '192.168.2.11'
+let ip = localStorage.getItem('esp32') || window.location.hostname
 ipInput.value = ip
 
 ipInput.onchange = (e) => {
