@@ -104,7 +104,7 @@ function App() {
     <div className="parent">
 
       <div style={{ width: '100%', maxWidth: 600, margin: '0 auto', position: 'relative'  }}>        
-        <img style={{ width: '100%' }} id="stream" src={"http://192.168.2.11:81/stream"} crossOrigin=""></img>
+        <img style={{ width: '100%' }} id="stream" src={url + ":81/stream"} crossOrigin=""></img>
 
         {predictions && predictions.map(prediction => 
           <div key={prediction.class + prediction.bbox[0]} className='box' style={bboxToStyle(prediction.bbox, prediction.class)}>{Math.round(prediction.score * 100)}% {prediction.class}</div>
@@ -120,15 +120,18 @@ function App() {
 
     <div className="set blue">
       <nav className="d-pad" style={{ maxWidth: 600, maxHeight: 600, margin: '0 auto' }}>
-        {getControl(() => doAction(1), stopMotor, 'up control')}
-        {getControl(() => doAction(4), stopMotor, 'right control')}
-        {getControl(() => doAction(2), stopMotor, 'down control')}
-        {getControl(() => doAction(3), stopMotor, 'left control')}
+        {getControl(() => doAction(3), stopMotor, 'up control')}
+        {getControl(() => doAction(1), stopMotor, 'right control')}
+        {getControl(() => doAction(4), stopMotor, 'down control')}
+        {getControl(() => doAction(2), stopMotor, 'left control')}
       </nav>
     </div>
   
 
-  <input type='text' value={hostname} onChange={e => setHostname(e.target.value)} />
+  <input type='text' value={hostname} onChange={e => {
+    setHostname(e.target.value)
+    localStorage.setItem('esp32', e.target.value)
+   }} />
   </div>
   );
 }
