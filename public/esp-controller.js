@@ -27,17 +27,20 @@ const addAction = (el, action) => {
     el.addEventListener('mouseup', () => doAction(0))
 
     el.addEventListener('touchstart', () => doAction(action))
-    el.addEventListener('ontouchend', () => doAction(0))
+    el.addEventListener('touchend', () => doAction(0))
 }
 
+let lastAction = 0;
+
 const doAction = (action) => {
-    fetch('http://' + ip + '/action?action=' + action)
+    lastAction =action;
+    fetch('http://' + ip + '/action?action=' + action).then(res => (res.text().then(res => console.log(res))))
 }
 
 addAction(upAction, 2)
 addAction(rightAction, 4)
 addAction(downAction, 1)
-addAction(leftAction, 1)
+addAction(leftAction, 3)
 
 upAction.style = controlStyle + 'margin-left:100px;margin-right:100px;'
 downAction.style = controlStyle + 'margin-left:100px;margin-right:100px;'
