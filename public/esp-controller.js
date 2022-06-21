@@ -34,10 +34,10 @@ const doAction = (action) => {
     fetch('http://' + ip + '/action?action=' + action)
 }
 
-addAction(upAction, 3)
-addAction(rightAction, 1)
-addAction(downAction, 4)
-addAction(leftAction, 2)
+addAction(upAction, 2)
+addAction(rightAction, 4)
+addAction(downAction, 1)
+addAction(leftAction, 1)
 
 upAction.style = controlStyle + 'margin-left:100px;margin-right:100px;'
 downAction.style = controlStyle + 'margin-left:100px;margin-right:100px;'
