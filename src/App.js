@@ -22,10 +22,6 @@ var stringToColour = function(str) {
 }
 
 const bboxToStyle = ([x, y, width, height], classname) => {
-
-  var espCamWidth = 320; 
-
-  var windowWidth = window.innerWidth;
   //var aspectRatio = windowWidth / espCamWidth;
   var aspectRatio = 1;
   var color = stringToColour(classname);
