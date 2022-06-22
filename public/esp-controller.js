@@ -139,6 +139,26 @@ const bboxToStyle = ([x, y, width, height], classname) => {
     return style
 }
 
+
+const aclDiv = document.createElement('div')
+aclDiv.innerHTML = 'test'
+
+const tilt = (data) => console.log(data)
+
+if (window.DeviceOrientationEvent) {
+    window.addEventListener("deviceorientation", function (event) {
+        tilt([event.beta, event.gamma]);
+    }, true);
+} else if (window.DeviceMotionEvent) {
+    window.addEventListener('devicemotion', function (event) {
+        tilt([event.acceleration.x * 2, event.acceleration.y * 2]);
+    }, true);
+} else {
+    window.addEventListener("MozOrientation", function (orientation) {
+        tilt([orientation.x * 50, orientation.y * 50]);
+    }, true);
+}
+
 document.addEventListener("DOMContentLoaded", function(){
     imgContainer.appendChild(camStream)
     document.body.appendChild(imgContainer)
@@ -152,4 +172,11 @@ document.addEventListener("DOMContentLoaded", function(){
     document.body.appendChild(ipInput)
     document.body.appendChild(objectReclabel)
     document.body.appendChild(container)
+    document.body.appendChild(aclDiv)
+
+    var iframe = document.createElement('iframe')
+
+    iframe.src= 'https://dorukeker.github.io/gyronorm_samples/demo/'
+
+    document.body.appendChild(iframe)
 });
