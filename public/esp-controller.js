@@ -15,13 +15,13 @@ script.addEventListener('load', () => {
     joystick.id = 'joyDiv'
     new window.JoyStick('joyDiv', {}, (stickData) => {
         lastStickData = stickData;
-        console.log(lastStickData)
+        // console.log(lastStickData)
 
         if (!fetching) {
             doActionJoystick(lastStickData, () => {
                 fetching = false;
                 if (lastStickData.x === '0' && lastStickData.y === '0') {
-                    doActionJoystick(lastStickData)
+                    doActionJoystick(lastStickData, () => {fetching = false })
                 }
             })
         }
@@ -31,7 +31,7 @@ script.addEventListener('load', () => {
 const doActionJoystick = (stickData, callback) => {
     fetching = true;
     const maxSpeed = 255;
-    const maxStick = 170;
+    const maxStick = 200;
 
     const y = Number(stickData.y);
     const x = Number(stickData.x);
@@ -41,13 +41,13 @@ const doActionJoystick = (stickData, callback) => {
 
     const stickLength = Math.sqrt(x*x + y*y)
 
-    const motorASpeed = (stickLength - (x/4)) / maxStick * maxSpeed
-    const motorBSpeed = (stickLength + (x/4)) / maxStick * maxSpeed
+    const motorASpeed = (stickLength - (x/2)) / maxStick * maxSpeed
+    const motorBSpeed = (stickLength + (x/2)) / maxStick * maxSpeed
 
     // console.log({x,y})
     // console.log({motorAdirection, motorBdirection, motorASpeed, motorBSpeed})
     
-    fetch('http://' + ip + '/action?adir=' + motorAdirection + '&bdir=' + motorBdirection + '&aspeed=' + Math.floor(motorASpeed) + '&bspeed=' + Math.floor(motorBSpeed)).then(response => response.text().then(text => {
+    fetch('http://' + ip + '/action?adir=' + (motorAdirection ? 1 : 0) + '&bdir=' + (motorBdirection ? 1 : 0) + '&aspeed=' + Math.floor(motorASpeed) + '&bspeed=' + Math.floor(motorBSpeed)).then(response => response.text().then(text => {
         console.log(text)
         callback()
     }))
