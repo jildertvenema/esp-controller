@@ -1,3 +1,58 @@
+const joyjs = 'https://raw.githack.com/jildertvenema/esp-controller/master/public/joy.js'
+
+const script = document.createElement('script')
+script.src = joyjs;
+
+var fetching = false
+
+var lastStickData;
+
+script.addEventListener('load', () => {
+
+    var joystick = document.createElement('div')
+    container.appendChild(joystick);
+    joystick.style = "width:200px;height:200px;margin-bottom:20px;float:right;"
+    joystick.id = 'joyDiv'
+    new window.JoyStick('joyDiv', {}, (stickData) => {
+        lastStickData = stickData;
+        console.log(lastStickData)
+
+        if (!fetching) {
+            doActionJoystick(lastStickData, () => {
+                fetching = false;
+                if (lastStickData.x === '0' && lastStickData.y === '0') {
+                    doActionJoystick(lastStickData)
+                }
+            })
+        }
+    });
+})
+
+const doActionJoystick = (stickData, callback) => {
+    fetching = true;
+    const maxSpeed = 255;
+    const maxStick = 170;
+
+    const y = Number(stickData.y);
+    const x = Number(stickData.x);
+    // const motorASpeed = 
+    const motorAdirection = y > 0
+    const motorBdirection = y > 0
+
+    const stickLength = Math.sqrt(x*x + y*y)
+
+    const motorASpeed = (stickLength - (x/4)) / maxStick * maxSpeed
+    const motorBSpeed = (stickLength + (x/4)) / maxStick * maxSpeed
+
+    // console.log({x,y})
+    // console.log({motorAdirection, motorBdirection, motorASpeed, motorBSpeed})
+    
+    fetch('http://' + ip + '/action?adir=' + motorAdirection + '&bdir=' + motorBdirection + '&aspeed=' + Math.floor(motorASpeed) + '&bspeed=' + Math.floor(motorBSpeed)).then(response => response.text().then(text => {
+        console.log(text)
+        callback()
+    }))
+}
+
 const ipInput = document.createElement('input')
 ipInput.type = 'text'
 ipInput.style = 'margin: 0 auto;display:block;margin-top:12px;'
@@ -139,44 +194,18 @@ const bboxToStyle = ([x, y, width, height], classname) => {
     return style
 }
 
-
-const aclDiv = document.createElement('div')
-aclDiv.innerHTML = 'test'
-
-const tilt = (data) => console.log(data)
-
-if (window.DeviceOrientationEvent) {
-    window.addEventListener("deviceorientation", function (event) {
-        tilt([event.beta, event.gamma]);
-    }, true);
-} else if (window.DeviceMotionEvent) {
-    window.addEventListener('devicemotion', function (event) {
-        tilt([event.acceleration.x * 2, event.acceleration.y * 2]);
-    }, true);
-} else {
-    window.addEventListener("MozOrientation", function (orientation) {
-        tilt([orientation.x * 50, orientation.y * 50]);
-    }, true);
-}
-
 document.addEventListener("DOMContentLoaded", function(){
     imgContainer.appendChild(camStream)
     document.body.appendChild(imgContainer)
 
-    container.appendChild(upAction)
-    container.appendChild(leftAction)
-    container.appendChild(stopAction)
-    container.appendChild(rightAction)
-    container.appendChild(downAction)
+    // container.appendChild(upAction)
+    // container.appendChild(leftAction)
+    // container.appendChild(stopAction)
+    // container.appendChild(rightAction)
+    // container.appendChild(downAction)
 
     document.body.appendChild(ipInput)
     document.body.appendChild(objectReclabel)
     document.body.appendChild(container)
-    document.body.appendChild(aclDiv)
-
-    var iframe = document.createElement('iframe')
-
-    iframe.src= 'https://dorukeker.github.io/gyronorm_samples/demo/'
-
-    document.body.appendChild(iframe)
+    document.body.appendChild(script);
 });
