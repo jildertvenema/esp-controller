@@ -75,16 +75,20 @@ ipInput.onchange = (e) => {
     ip = e.target.value; 
     camStream.src = 'http://' + ip + ':81/stream'
     localStorage.setItem('esp32', ip)
-    fetch('http://' + ip + "/control?var=framesize&val=9").then()
+    fetch('http://' + ip + "/control?var=framesize&val=12").then()
 }
 
-fetch('http://' + ip + "/control?var=framesize&val=9").then()
+fetch('http://' + ip + "/control?var=framesize&val=12").then()
 
 const imgContainer = document.createElement('div')
 const camStream = document.createElement('img')
 
 camStream.crossOrigin = "anonymous"
-imgContainer.style="width:100vw;max-width:600px;margin: 0 auto;position:relative;"
+imgContainer.style=`width:100vw;max-width:600px;margin: 0 auto;position:relative;
+height: 100vw;
+transform: rotate(90deg);
+margin-left: -33px;
+`
 camStream.style="width:100%"
 
 camStream.src = 'http://' + ip + ':81/stream'
@@ -156,7 +160,7 @@ const renderPredictions = (predictions) => {
         box.className = 'box';
         box.style = bboxToStyle(prediction.bbox, prediction.class)
 
-        box.innerText = `${Math.round(prediction.score * 100)}% ${prediction.class}`
+        box.innerHTML = `<div style="transform: rotate(-90deg);margin-right: 30px;">${Math.round(prediction.score * 100)}% ${prediction.class}</div>`
 
         imgContainer.appendChild(box);
     })
