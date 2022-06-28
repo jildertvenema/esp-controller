@@ -5,30 +5,48 @@ script.src = joyjs;
 
 var fetching = false
 
-var lastStickData;
+var lastStickData = { x: 0, y : 0 };
+var lastServoStickData = { x: 90, y: 90};
 
 script.addEventListener('load', () => {
 
+    var joystickServo = document.createElement('div')
+    container.appendChild(joystickServo);
+
     var joystick = document.createElement('div')
     container.appendChild(joystick);
-    joystick.style = "width:200px;height:200px;margin-bottom:20px;float:right;"
-    joystick.id = 'joyDiv'
-    new window.JoyStick('joyDiv', {}, (stickData) => {
-        lastStickData = stickData;
-        // console.log(lastStickData)
 
+    joystick.style = "width:160px;height:200px;margin-bottom:20px;float:right;"
+    joystick.id = 'joyDiv'
+
+    joystickServo.id = 'joyServo'
+    joystickServo.style = "width:160px;height:200px;margin-bottom:20px;float:left;"
+
+    var joyServo = new window.JoyStick('joyServo', {}, (servoStickData) => {
+        lastServoStickData = { x: joyServo.GetX(), y: joyServo.GetY() };
+        console.log(lastServoStickData)
+        doActionStuff();
+    })
+
+    var joystickclass = new window.JoyStick('joyDiv', {}, (stickData) => {
+        lastStickData = { x: joystickclass.GetX(), y: joystickclass.GetY() };
+        doActionStuff();
+    });
+
+
+    const doActionStuff = () => {
         if (!fetching) {
-            doActionJoystick(lastStickData, () => {
+            doActionJoystick(lastStickData, lastServoStickData, () => {
                 fetching = false;
-                if (lastStickData.x === '0' && lastStickData.y === '0') {
-                    doActionJoystick(lastStickData, () => {fetching = false })
+                if ((lastStickData.x === '0' && lastStickData.y) === '0' || (lastServoStickData.x === '0' && lastServoStickData.y)) {
+                    doActionJoystick(lastStickData, lastServoStickData, () => {fetching = false })
                 }
             })
         }
-    });
+    }
 })
 
-const doActionJoystick = (stickData, callback) => {
+const doActionJoystick = (stickData, servoStickData,  callback) => {
     fetching = true;
     const maxSpeed = 255;
     const maxStick = 200;
@@ -44,14 +62,18 @@ const doActionJoystick = (stickData, callback) => {
     const motorASpeed = (stickLength - (x/2)) / maxStick * maxSpeed
     const motorBSpeed = (stickLength + (x/2)) / maxStick * maxSpeed
 
+    let servoY = Math.round((Number(servoStickData.y) + 200) / 400 * 180);
+    let servoX = Math.round((Number(servoStickData.x) + 100) / 200 * 180);
+
     // console.log({x,y})
     // console.log({motorAdirection, motorBdirection, motorASpeed, motorBSpeed})
     
-    fetch('http://' + ip + '/action?adir=' + (motorAdirection ? 1 : 0) + '&bdir=' + (motorBdirection ? 1 : 0) + '&aspeed=' + Math.floor(motorASpeed) + '&bspeed=' + Math.floor(motorBSpeed)).then(response => response.text().then(text => {
+    fetch('http://' + ip + '/action?adir=' + (motorAdirection ? 1 : 0) + '&servob=' + servoX + '&servoa=' + servoY + '&bdir=' + (motorBdirection ? 1 : 0) + '&aspeed=' + Math.floor(motorASpeed) + '&bspeed=' + Math.floor(motorBSpeed)).then(response => response.text().then(text => {
         console.log(text)
         callback()
     }))
 }
+
 
 const ipInput = document.createElement('input')
 ipInput.type = 'text'
@@ -98,7 +120,7 @@ const upAction = document.createElement('div')
 
 const controlStyle = "width:100px;height:100px;background:gray;float:left;cursor:pointer;"
 
-container.style="width:300px;height:300px;margin:0 auto;margin-top:12px;"
+container.style="width:100%;height:300px;margin-top:12px;"
 upAction.style = controlStyle
 
 const downAction = upAction.cloneNode();
