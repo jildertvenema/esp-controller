@@ -59,8 +59,11 @@ const doActionJoystick = (stickData, servoStickData,  callback) => {
 
     const stickLength = Math.sqrt(x*x + y*y)
 
-    const motorASpeed = (stickLength - (x/2)) / maxStick * maxSpeed
-    const motorBSpeed = (stickLength + (x/2)) / maxStick * maxSpeed
+    let motorASpeed = (stickLength - (x/2)) / maxStick * maxSpeed
+    let motorBSpeed = (stickLength + (x/2)) / maxStick * maxSpeed
+
+    motorASpeed = Math.min(255, motorASpeed * 1.5);
+    motorBSpeed =  Math.min(255, motorBSpeed * 1.5);
 
     let servoY = Math.round((Number(servoStickData.y) + 200) / 400 * 180);
     let servoX = Math.round((Number(servoStickData.x) + 100) / 200 * 180);
