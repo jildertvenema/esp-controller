@@ -93,6 +93,18 @@ objectReclabel.style = 'margin: 0 auto;display:block;text-align: center;'
 objectReclabel.innerText = 'Use object recognition'
 objectReclabel.appendChild(objectRecInput)
 
+const followInputcheck = objectRecInput.cloneNode();
+const followInput = objectRecInput.cloneNode();
+followInput.type = 'text'
+const followInputLabel = objectReclabel.cloneNode();
+
+
+followInputLabel.innerText = 'Follow'
+followInputLabel.appendChild(followInput)
+followInput.value = 'person'
+followInputcheck.checked = false;
+followInputLabel.appendChild(followInputcheck)
+
 let ip = localStorage.getItem('esp32') || window.location.hostname
 ipInput.value = ip
 
@@ -100,10 +112,12 @@ ipInput.onchange = (e) => {
     ip = e.target.value; 
     camStream.src = 'http://' + ip + ':81/stream'
     localStorage.setItem('esp32', ip)
-    fetch('http://' + ip + "/control?var=framesize&val=12").then()
+    fetch('http://' + ip + "/control?var=framesize&val=7").then()
+    fetch('http://' + ip + "/control?var=hmirror&val=1").then()
 }
 
-fetch('http://' + ip + "/control?var=framesize&val=12").then()
+fetch('http://' + ip + "/control?var=framesize&val=7").then()
+fetch('http://' + ip + "/control?var=hmirror&val=1").then()
 
 const imgContainer = document.createElement('div')
 const camStream = document.createElement('img')
@@ -169,12 +183,14 @@ const detectFromVideoFrame = (model, video) => {
         })
     }
 
-    setTimeout(() => detectFromVideoFrame(model, video), 750);
+    setTimeout(() => detectFromVideoFrame(model, video), 200);
 };
 
 window.cocoSsd.load().then(model => {
     setTimeout(() => detectFromVideoFrame(model, camStream), 100)
 });
+
+var lastDir;
 
 const renderPredictions = (predictions) => {
     Array.from(imgContainer.getElementsByClassName('box')).forEach(item => imgContainer.removeChild(item))
@@ -189,6 +205,38 @@ const renderPredictions = (predictions) => {
 
         imgContainer.appendChild(box);
     })
+
+    if (followInputcheck.checked) {
+        var followPred = predictions.find(pred => `${pred.class}`.toLowerCase() === followInput.value.toLowerCase())
+        if (followPred) {
+            var percentage = 100 / camStream.offsetHeight * (followPred.bbox[1] + followPred.bbox[3] / 2)
+            
+            var right = percentage < 50
+
+            lastDir = right;
+
+            var speed = Math.abs(percentage - 50)
+            var motorASpeed = 150;
+            var motorBSpeed = 150
+
+            if (right) {
+                motorASpeed = motorASpeed - speed * 2.2;
+            }
+            else {
+                motorBSpeed = motorASpeed - speed * 2.2;
+            }
+
+            fetch('http://' + ip + '/action?adir=1&servob=0&servoa=0&bdir=1&aspeed=' + Math.floor(motorASpeed) + '&bspeed=' + Math.floor(motorBSpeed)).then(response => response.text().then(text => {
+                console.log(text)
+            }))
+
+        }
+        else {
+            fetch('http://' + ip + `/action?adir=1&servob=0&servoa=0&bdir=1&aspeed=${lastDir ? 0 : 120}&bspeed=${lastDir ? 120 : 0}`).then(response => response.text().then(text => {
+                console.log(text)
+            }))
+        }
+    }
 
 }
 
@@ -235,6 +283,7 @@ document.addEventListener("DOMContentLoaded", function(){
 
     document.body.appendChild(ipInput)
     document.body.appendChild(objectReclabel)
+    document.body.appendChild(followInputLabel)
     document.body.appendChild(container)
     document.body.appendChild(script);
 });
